@@ -1,0 +1,70 @@
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom styles for code highlighting */
+pre code {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 0.25rem;
+}
+
+/* Improved focus styles for accessibility */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+/* Pattern badge colors */
+.pattern-badge-dfs {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: rgb(185, 28, 28);
+}
+
+.pattern-badge-bfs {
+  background-color: rgba(79, 70, 229, 0.2);
+  color: rgb(55, 48, 163);
+}
+
+.pattern-badge-dp {
+  background-color: rgba(168, 85, 247, 0.2);
+  color: rgb(126, 34, 206);
+}
+
+/* Loading animations */
+.pulsate {
+  animation: pulsate 1.5s ease-in-out infinite;
+}
+
+@keyframes pulsate {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}

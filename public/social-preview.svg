@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="url(#paint0_linear)" />
+  
+  <rect x="150" y="150" width="300" height="300" rx="50" fill="url(#paint1_linear)" />
+  
+  <path d="M210 222C210 216.477 214.477 212 220 212H363C368.523 212 373 216.477 373 222V242C373 247.523 368.523 252 363 252H220C214.477 252 210 247.523 210 242V222Z" fill="white" />
+  <path d="M210 282C210 276.477 214.477 272 220 272H323C328.523 272 333 276.477 333 282V302C333 307.523 328.523 312 323 312H220C214.477 312 210 307.523 210 302V282Z" fill="white" />
+  <path d="M210 342C210 336.477 214.477 332 220 332H273C278.523 332 283 336.477 283 342V362C283 367.523 278.523 372 273 372H220C214.477 372 210 367.523 210 362V342Z" fill="white" />
+  
+  <path d="M373 271.75C373 271.75 358.75 291.75 351.25 291.75C343.75 291.75 339.375 287.375 339.375 279.875C339.375 272.375 348.125 265.5 354 265.5C359.875 265.5 373 271.75 373 271.75Z" fill="white" />
+  <path d="M373 341.75C373 341.75 358.75 361.75 351.25 361.75C343.75 361.75 339.375 357.375 339.375 349.875C339.375 342.375 348.125 335.5 354 335.5C359.875 335.5 373 341.75 373 341.75Z" fill="white" />
+  
+  <text x="500" y="280" font-family="Inter, sans-serif" font-weight="700" font-size="80" fill="white">LeetCode Patterns</text>
+  <text x="500" y="360" font-family="Inter, sans-serif" font-weight="400" font-size="36" fill="white" opacity="0.9">Master Algorithmic Approaches</text>
+  
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A" />
+      <stop offset="1" stop-color="#1E293B" />
+    </linearGradient>
+    <linearGradient id="paint1_linear" x1="150" y1="150" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0CA5E9" />
+      <stop offset="1" stop-color="#8B5CF6" />
+    </linearGradient>
+  </defs>
+</svg>

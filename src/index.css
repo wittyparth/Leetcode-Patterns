@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Base styles */
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  scroll-behavior: smooth;
+}
+
+code {
+  font-family: 'Fira Code', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--b3, var(--b2))/0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--bc)/0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--bc)/0.3);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(to right, #0284c7, #7c3aed);
+  }
+}
