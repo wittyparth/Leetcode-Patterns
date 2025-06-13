@@ -1,3 +1,5 @@
+// Remove duplicates by problem_link (LeetCode link is unique)
+const seen = new Set();
 export const allProblems = [
     {
         "problem_name": "Two Sum",
@@ -2485,4 +2487,8 @@ export const allProblems = [
             { "name": "Amazon", "frequency": 8 }
         ]
     }
-]
+].filter(problem => {
+    if (seen.has(problem.problem_link)) return false;
+    seen.add(problem.problem_link);
+    return true;
+});

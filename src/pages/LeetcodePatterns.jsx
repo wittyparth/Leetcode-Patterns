@@ -1,98 +1,47 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import patternsData from '../data/leetcode_problems.json';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { motion } from "motion/react"
+import { useState, useMemo } from 'react';
+import { useCompletedProblems } from '../hooks/useLocalStorage';
 import { Search, Eye, EyeOff, RotateCcw, ExternalLink, Lock } from 'lucide-react';
 
-const LeetCodePatterns = ({ patterns }) => {
-    const [completedProblems, setCompletedProblems] = useLocalStorage('leetcode-completed', {});
-    const [showPatternNames, setShowPatternNames] = useLocalStorage('leetcode-show-pattern-names', true);
+const LeetCodePatterns = ({ patterns, completedProblems: completedProblemsProp, toggleProblemCompletion: toggleProblemCompletionProp }) => {
+    const local = useCompletedProblems();
+    const completedProblems = completedProblemsProp || local.completedProblems;
+    const toggleProblemCompletion = toggleProblemCompletionProp || local.toggleProblemCompletion;
+    const setCompletedProblems = local.setCompletedProblems;
+
+    const [showPatternNames, setShowPatternNames] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+    const [showCompletedOnly, setShowCompletedOnly] = useState(false);
     const [expandedCompanies, setExpandedCompanies] = useState({});
-    const [completionFilter, setCompletionFilter] = useState('all'); // all, completed, uncompleted
-    const [patternTag, setPatternTag] = useState('all');
-    const [companyFilter, setCompanyFilter] = useState('all');
 
-    const toggleProblemCompletion = (problemName) => {
-        setCompletedProblems(prev => ({
-            ...prev,
-            [problemName]: {
-                completed: !prev[problemName]?.completed,
-                lastSolved: !prev[problemName]?.completed ? new Date().toISOString() : prev[problemName]?.lastSolved,
-                toggleCount: (prev[problemName]?.toggleCount || 0) + 1
-            }
-        }));
-    };
-
-    // Use the provided patterns prop if available, otherwise use all problems
-    const allProblems = useMemo(() => {
-        if (patterns && Array.isArray(patterns)) return patterns;
-        return patternsData.problems;
-    }, [patterns]);
-
-    // Get all unique pattern tags
-    const allPatternTags = useMemo(() => {
-        const tags = new Set();
-        allProblems.forEach(p => p.patterns && p.patterns.forEach(tag => tags.add(tag)));
-        return Array.from(tags);
-    }, [allProblems]);
-
-    // Get all unique companies
-    const allCompanies = useMemo(() => {
-        const companies = new Set();
-        allProblems.forEach(p => p.companies && p.companies.forEach(c => companies.add(c.name)));
-        return Array.from(companies);
-    }, [allProblems]);
-
-    // Always filter for completed problems
-    const filteredProblems = useMemo(() => {
-        return allProblems.filter(problem => {
-            const matchesSearch = problem.problem_name.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesDifficulty = selectedDifficulty === 'All' || problem.difficulty === selectedDifficulty;
-            // Completion filter
-            const isCompleted = completedProblems[problem.problem_name]?.completed;
-            let matchesCompletion = true;
-            if (completionFilter === 'completed') matchesCompletion = isCompleted;
-            else if (completionFilter === 'uncompleted') matchesCompletion = !isCompleted;
-            // Pattern tag filter
-            let matchesPattern = patternTag === 'all' || (problem.patterns && problem.patterns.includes(patternTag));
-            // Company filter
-            let matchesCompany = companyFilter === 'all' || (problem.companies && problem.companies.some(c => c.name === companyFilter));
-            return matchesSearch && matchesDifficulty && matchesCompletion && matchesPattern && matchesCompany;
-        });
-    }, [searchTerm, selectedDifficulty, completedProblems, allProblems, completionFilter, patternTag, companyFilter]);
-
-    // Reset progress: clear all completed problems
     const resetProgress = () => {
-        setCompletedProblems({});
-    };
-
-    // Pattern tag badge color
-    const getPatternTagColor = (pattern) => {
-        // Example: assign colors based on pattern name
-        if (/dfs|depth/i.test(pattern)) return 'bg-red-100 text-red-700 border-red-200';
-        if (/bfs|breadth/i.test(pattern)) return 'bg-indigo-100 text-indigo-700 border-indigo-200';
-        if (/dp|dynamic/i.test(pattern)) return 'bg-purple-100 text-purple-700 border-purple-200';
-        if (/greedy/i.test(pattern)) return 'bg-green-100 text-green-700 border-green-200';
-        if (/sliding/i.test(pattern)) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-        if (/two pointers/i.test(pattern)) return 'bg-blue-100 text-blue-700 border-blue-200';
-        return 'bg-base-200 text-base-content border-base-300';
-    };
-    // Company tag badge color
-    const getCompanyTagColor = () => 'bg-purple-50 text-purple-600 border-purple-200';
-    // Difficulty tag color (restore previous vibrant style)
-    const getDifficultyColor = (difficulty) => {
-        switch (difficulty) {
-            case 'Easy': return 'text-green-700 bg-green-100 border-green-200';
-            case 'Medium': return 'text-yellow-700 bg-yellow-100 border-yellow-200';
-            case 'Hard': return 'text-red-700 bg-red-100 border-red-200';
-            default: return 'text-base-content bg-base-200 border-base-300';
+        if (window.confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+            setCompletedProblems({});
         }
     };
 
-    const totalProblems = allProblems.length;
-    const completedCount = allProblems.filter(p => completedProblems[p.problem_name]?.completed).length;
+    const getDifficultyColor = (difficulty) => {
+        switch (difficulty) {
+            case 'Easy': return 'text-green-600 bg-green-50 border-green-200';
+            case 'Medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+            case 'Hard': return 'text-red-600 bg-red-50 border-red-200';
+            default: return 'text-gray-600 bg-gray-50 border-gray-200';
+        }
+    };
+
+    const filteredProblems = useMemo(() => {
+        return patterns.filter(problem => {
+            const matchesSearch = problem.problem_name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesDifficulty = selectedDifficulty === 'All' || problem.difficulty === selectedDifficulty;
+            const matchesCompleted = !showCompletedOnly || (completedProblems[problem.problem_name]?.completed === true);
+
+            return matchesSearch && matchesDifficulty && matchesCompleted;
+        });
+    }, [searchTerm, selectedDifficulty, showCompletedOnly, completedProblems, patterns]);
+
+    const totalProblems = patterns.length;
+    const completedCount = patterns.filter(p => completedProblems[p.problem_name]?.completed).length;
     const totalProgress = totalProblems > 0 ? (completedCount / totalProblems) * 100 : 0;
 
     // Calculate progress by difficulty
@@ -102,14 +51,14 @@ const LeetCodePatterns = ({ patterns }) => {
             Medium: { total: 0, completed: 0 },
             Hard: { total: 0, completed: 0 }
         };
-        allProblems.forEach(problem => {
+        patterns.forEach(problem => {
             stats[problem.difficulty].total++;
             if (completedProblems[problem.problem_name]?.completed) {
                 stats[problem.difficulty].completed++;
             }
         });
         return stats;
-    }, [allProblems, completedProblems]);
+    }, [patterns, completedProblems]);
 
     const toggleCompanyExpansion = (problemName) => {
         setExpandedCompanies((prev) => ({
@@ -119,7 +68,7 @@ const LeetCodePatterns = ({ patterns }) => {
     };
 
     return (
-        <div className="min-h-screen bg-base-100 text-base-content">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Header */}
                 <motion.div
@@ -127,16 +76,16 @@ const LeetCodePatterns = ({ patterns }) => {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center mb-8"
                 >
-                    <h1 className="text-4xl font-bold text-base-content mb-4">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         LeetCode Patterns
                     </h1>
-                    <p className="text-xl text-base-content/70 mb-6">
+                    <p className="text-xl text-gray-600 mb-6">
                         A curated list of LeetCode problems grouped by pattern to help you master coding interviews
                     </p>
 
                     {/* Total Progress Bar */}
                     <div className="max-w-2xl mx-auto mb-6">
-                        <div className="text-sm text-base-content/70 mb-2">
+                        <div className="text-sm text-gray-600 mb-2">
                             Total Progress: {completedCount}/{totalProblems} ({Math.round(totalProgress)}%)
                         </div>
                         <div className="w-full bg-secondary rounded-full h-3 mb-6">
@@ -151,19 +100,19 @@ const LeetCodePatterns = ({ patterns }) => {
 
                     {/* Difficulty Progress Bars */}
                     <div className="max-w-2xl mx-auto mb-6 space-y-4">
-                        {Object.entries(difficultyStats).map(([difficulty, stats]) => {
+                        {Object.entries(difficultyStats).map(([difficulty, stats], index) => {
                             const percentage = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
                             return (
-                                <div key={difficulty} className="space-y-2">
+                                <div key={index} className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className={`font-medium ${getDifficultyColor(difficulty).split(' ')[0]}`}>
                                             {difficulty}
                                         </span>
-                                        <span className="text-base-content/70">
+                                        <span className="text-gray-600">
                                             {stats.completed}/{stats.total} ({Math.round(percentage)}%)
                                         </span>
                                     </div>
-                                    <div className="w-full bg-base-200 rounded-full h-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
                                         <motion.div
                                             className={`h-2 rounded-full ${difficulty === 'Easy' ? 'bg-green-500' :
                                                 difficulty === 'Medium' ? 'bg-yellow-500' : 'bg-red-500'
@@ -186,7 +135,7 @@ const LeetCodePatterns = ({ patterns }) => {
                     transition={{ delay: 0.1 }}
                     className="bg-background rounded-lg shadow-sm border p-6 mb-8"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                             <input
@@ -201,7 +150,7 @@ const LeetCodePatterns = ({ patterns }) => {
                         <select
                             value={selectedDifficulty}
                             onChange={(e) => setSelectedDifficulty(e.target.value)}
-                            className="select select-bordered w-full"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         >
                             <option value="All">All Difficulties</option>
                             <option value="Easy">Easy</option>
@@ -209,35 +158,19 @@ const LeetCodePatterns = ({ patterns }) => {
                             <option value="Hard">Hard</option>
                         </select>
 
-                        <select
-                            value={completionFilter}
-                            onChange={e => setCompletionFilter(e.target.value)}
-                            className="select select-bordered w-full"
-                        >
-                            <option value="all">All Problems</option>
-                            <option value="completed">Completed</option>
-                            <option value="uncompleted">Uncompleted</option>
-                        </select>
-                        <select
-                            value={patternTag}
-                            onChange={e => setPatternTag(e.target.value)}
-                            className="select select-bordered w-full"
-                        >
-                            <option value="all">All Patterns</option>
-                            {allPatternTags.map(tag => (
-                                <option key={tag} value={tag}>{tag}</option>
-                            ))}
-                        </select>
-                        <select
-                            value={companyFilter}
-                            onChange={e => setCompanyFilter(e.target.value)}
-                            className="select select-bordered w-full"
-                        >
-                            <option value="all">All Companies</option>
-                            {allCompanies.map(company => (
-                                <option key={company} value={company}>{company}</option>
-                            ))}
-                        </select>
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="completed-only"
+                                checked={showCompletedOnly}
+                                onChange={(e) => setShowCompletedOnly(e.target.checked)}
+                                className="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                            />
+                            <label htmlFor="completed-only" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                Show completed only
+                            </label>
+                        </div>
+
                         <button
                             onClick={resetProgress}
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
@@ -312,7 +245,7 @@ const LeetCodePatterns = ({ patterns }) => {
                                                 href={problem.problem_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className={`font-medium hover:text-primary transition-colors ${completedProblems[problem.problem_name]?.completed ? 'line-through text-base-content/50' : 'text-base-content'}`}
+                                                className={`font-medium hover:text-blue-600 transition-colors ${completedProblems[problem.problem_name]?.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}
                                             >
                                                 {problem.problem_name}
                                             </a>
@@ -325,7 +258,7 @@ const LeetCodePatterns = ({ patterns }) => {
                                         <td className="p-4 align-middle">
                                             <div className="flex flex-wrap gap-1">
                                                 {problem.patterns.map((pattern, index) => (
-                                                    <div key={index} className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${getPatternTagColor(pattern)}`}>
+                                                    <div key={index} className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-blue-600 bg-blue-50 border-blue-200">
                                                         {pattern}
                                                     </div>
                                                 ))}
@@ -353,7 +286,7 @@ const LeetCodePatterns = ({ patterns }) => {
                                             {(expandedCompanies[problem.problem_name] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${getCompanyTagColor()}`}
+                                                    className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-purple-600 bg-purple-50 border-purple-200"
                                                     title={`Asked ${company.frequency} times`}
                                                 >
                                                     {company.name} ({company.frequency})
@@ -362,7 +295,7 @@ const LeetCodePatterns = ({ patterns }) => {
                                             {problem.companies.length > 3 && (
                                                 <button
                                                     onClick={() => toggleCompanyExpansion(problem.problem_name)}
-                                                    className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-base-content/60"
+                                                    className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-gray-500"
                                                 >
                                                     {expandedCompanies[problem.problem_name] ? 'Show Less' : `+${problem.companies.length - 3}`}
                                                 </button>
@@ -382,7 +315,7 @@ const LeetCodePatterns = ({ patterns }) => {
                         animate={{ opacity: 1 }}
                         className="text-center py-12"
                     >
-                        <div className="text-base-content/60 text-lg">
+                        <div className="text-gray-500 text-lg">
                             No problems found matching your criteria.
                         </div>
                     </motion.div>
@@ -393,7 +326,7 @@ const LeetCodePatterns = ({ patterns }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="mt-16 text-center text-base-content/60 text-sm"
+                    className="mt-16 text-center text-gray-500 text-sm"
                 >
                     <p>
                         This is a curated list of LeetCode problems to help you prepare for coding interviews.

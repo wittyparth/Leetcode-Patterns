@@ -1,0 +1,227 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { patternCategories } from '../data/patterns';
+import SearchBar from '../components/common/SearchBar';
+import UserDashboard from '../components/common/UserDashboard';
+
+const PatternListPage = ({ completedProblems }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredPatterns, setFilteredPatterns] = useState(patternCategories);
+    const [sortCriteria, setSortCriteria] = useState('default');
+    const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+
+    // Filter and sort patterns based on search, sort, and difficulty
+    useEffect(() => {
+        let result = [...patternCategories];
+
+        // Apply search filter
+        if (searchTerm) {
+            result = result.filter(pattern =>
+                pattern.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                pattern.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Sort patterns
+        if (sortCriteria === 'name') {
+            result.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortCriteria === 'count') {
+            result.sort((a, b) => b.count - a.count);
+        }
+
+        // Apply difficulty filter (in a real app, patterns would have difficulty data)
+        if (selectedDifficulty !== 'all') {
+            // This is where you would filter by difficulty if each pattern had a difficulty level
+        }
+
+        setFilteredPatterns(result);
+    }, [searchTerm, sortCriteria, selectedDifficulty]);
+
+    return (
+        <div className="min-h-screen pt-20 pb-16">
+            <div className="container mx-auto px-4">
+                {/* Page Header */}
+                <motion.div
+                    className="mb-12 text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h1 className="text-4xl font-bold mb-2">LeetCode Patterns</h1>
+                    <p className="text-lg opacity-80 max-w-2xl mx-auto">
+                        Browse all algorithm patterns with their associated problems, organized by categories and techniques.
+                    </p>
+                </motion.div>
+
+                {/* User Dashboard */}
+                <motion.div
+                    className="mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                    <UserDashboard />
+                </motion.div>
+
+                {/* Filters and Search */}
+                <motion.div
+                    className="mb-8 p-4 bg-base-200 rounded-xl shadow-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <div className="w-full md:w-1/2">
+                            <SearchBar
+                                placeholder="Search patterns by name or description..."
+                                onSearch={setSearchTerm}
+                            />
+                        </div>
+
+                        <div className="flex flex-1 gap-4 w-full md:w-auto">
+                            <select
+                                className="select select-bordered flex-1"
+                                value={sortCriteria}
+                                onChange={(e) => setSortCriteria(e.target.value)}
+                            >
+                                <option value="default">Sort by: Default</option>
+                                <option value="name">Sort by: Name A-Z</option>
+                                <option value="count">Sort by: Problem Count</option>
+                            </select>
+
+                            <select
+                                className="select select-bordered flex-1"
+                                value={selectedDifficulty}
+                                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                            >
+                                <option value="all">All Difficulties</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Patterns List */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredPatterns.length > 0 ? (
+                        filteredPatterns.map((pattern, index) => (
+                            <PatternCard
+                                key={pattern.id}
+                                pattern={pattern}
+                                index={index}
+                                completedProblems={completedProblems}
+                            />
+                        ))
+                    ) : (
+                        <motion.div
+                            className="col-span-full text-center py-16"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <div className="text-6xl mb-4">🔍</div>
+                            <h3 className="text-2xl font-bold mb-2">No patterns found</h3>
+                            <p className="text-base-content/70">
+                                Try adjusting your search or filters to find what you're looking for.
+                            </p>
+                        </motion.div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Pattern Card Component
+const PatternCard = ({ pattern, index, completedProblems }) => {
+    // Calculate completion percentage for this pattern based on completed problems
+    const calculateCompletionPercentage = () => {
+        if (!completedProblems || Object.keys(completedProblems).length === 0) {
+            return 0;
+        }
+
+        // This is a simplified implementation
+        // In a real app, you'd filter completedProblems by the ones belonging to this pattern
+        // For now, just provide a random percentage based on the pattern ID to simulate progress
+        return Math.floor(pattern.id.charCodeAt(0) % 100);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+            whileHover={{ y: -5 }}
+            className="bg-base-100 rounded-xl overflow-hidden shadow-lg border border-base-300"
+        >
+            <div className={`h-2 ${pattern.color}`}></div>
+            <div className="p-6">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center">
+                        <div className="mr-4">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-8 w-8 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={pattern.icon} />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-semibold">{pattern.name}</h3>
+                    </div>
+                    <span className="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium bg-base-200">
+                        {pattern.count} problems
+                    </span>
+                </div>
+                <p className="mt-4 text-sm opacity-80">
+                    {pattern.description}
+                </p>
+
+                <div className="mt-6 mb-4">
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-medium">Completion</span>
+                        <span className="text-xs font-medium">{calculateCompletionPercentage()}%</span>
+                    </div>
+                    <div className="w-full bg-base-200 rounded-full h-2">
+                        <div
+                            className="bg-primary-500 h-2 rounded-full"
+                            style={{ width: `${calculateCompletionPercentage()}%` }}
+                        ></div>
+                    </div>
+                </div>
+
+                <Link to={`/patterns/${pattern.id}`} className="block mt-6">
+                    <motion.button
+                        className="btn btn-block btn-primary"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        Explore Pattern
+                    </motion.button>
+                </Link>
+            </div>
+        </motion.div>
+    );
+};
+
+// Pattern Analytics Component - Kept for reference
+const PatternAnalytic = ({ title, value, icon, bgColor }) => {
+    return (
+        <div className="flex items-center p-4 rounded-lg border border-base-300 bg-base-100">
+            <div className={`w-12 h-12 rounded-full ${bgColor} flex items-center justify-center mr-4`}>
+                {icon}
+            </div>
+            <div>
+                <div className="text-sm opacity-70">{title}</div>
+                <div className="text-2xl font-bold">{value}</div>
+            </div>
+        </div>
+    );
+};
+
+export default PatternListPage;
