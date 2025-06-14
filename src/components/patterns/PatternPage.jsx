@@ -58,9 +58,9 @@ const PatternPage = ({ patternData, patternId }) => {
 
     return (
         <div className="min-h-screen pt-16 pb-20 bg-gradient-to-br from-base-100 to-base-200/50">
-            <div className="max-w-[70%] mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="md:max-w-[80%] lg:max-w-[70%] mx-auto px-4 sm:px-6 lg:px-8 relative">
                 {/* Pattern Header - Blog style, not fixed */}
-                <div className="max-w-[80%] mx-auto mt-8 mb-8">
+                <div className="lg:max-w-[80%] mx-auto mt-8 mb-8">
                     <div className="flex items-center mb-2">
                         <Link to="/patterns" className="mr-2 text-primary hover:underline">
                         </Link>
